@@ -132,11 +132,11 @@ const initialProducts = [
 
 const initialSettings = {
     storeName: "ESCENSIO",
-    storeTagline: "The Essence of Luxury Fragrances",
+    storeTagline: "Artisanal Haute Parfumerie",
     heroTitle: "ESCENSIO",
-    heroSubtitle: "Crafted for those who appreciate elegance. Experience luxury, confidence, and individuality — in every spray.",
+    heroSubtitle: "Handcrafted with rare botanical extracts, aged woods, and quiet elegance.",
     heroImage: "/hero-new.jpg",
-    announcementBar: "✨ Special Offer: Complimentary 10ml Discovery Sample on Orders Over Rs. 15,000 | Visit Wah Cantt Kiosk",
+    announcementBar: "Complimentary 10ml Discovery Atomizer on Orders Over Rs. 15,000 | Kiosk Wah Cantt Open",
     announcementEnabled: true,
     currency: "PKR",
     currencySymbol: "Rs.",
@@ -148,7 +148,12 @@ const initialSettings = {
     category1Image: "/products/perfume-2.jpg",
     category2Image: "/products/perfume-3.jpg",
     category3Image: "/products/perfume-4.jpg",
-    marqueeText: "FREE EXPRESS SHIPPING ACROSS PAKISTAN • HANDCRAFTED PERFUMERY • KIOSK WAH CANTT • ESCENSIO LUXURY",
+    category4Image: "/products/perfume-1.jpg",
+    aboutHeroImage: "/hero-new.jpg",
+    aboutCraftImage: "/products/perfume-3.jpg",
+    customiseBannerImage: "/products/perfume-1.jpg",
+    contactBannerImage: "/products/perfume-4.jpg",
+    marqueeText: "HANDCRAFTED PERFUMERY • KIOSK WAH CANTT • ESCENSIO LUXURY • BOTANICAL EXTRACTS",
     marqueeTextColor: "#D4AF37",
     marqueeBgColor: "#0A0B0E",
     instagramUrl: "https://instagram.com/escensio.official",
@@ -198,45 +203,77 @@ const initialOrders = [
     }
 ];
 
-// In-Memory Global Store (Persists during Node server runtime)
+// In-Memory Global Store (Persists during Node server runtime fallback)
 let globalStore = {
     products: [...initialProducts],
     settings: { ...initialSettings },
     orders: [...initialOrders],
 };
 
+// Mongoose Schemas for MongoDB Persistence
+const SettingSchema = new mongoose.Schema({}, { strict: false, timestamps: true });
+const ProductSchema = new mongoose.Schema({}, { strict: false, timestamps: true });
+const OrderSchema = new mongoose.Schema({}, { strict: false, timestamps: true });
+
+const SettingModel = mongoose.models.Setting || mongoose.model("Setting", SettingSchema);
+const ProductModel = mongoose.models.Product || mongoose.model("Product", ProductSchema);
+const OrderModel = mongoose.models.Order || mongoose.model("Order", OrderSchema);
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
 /**
- * Connect to MongoDB if URI is provided, otherwise fallback to in-memory store
+ * Connect to MongoDB if MONGODB_URI is provided
  */
 export async function connectDB() {
     if (MONGODB_URI) {
-        if (mongoose.connection.readyState >= 1) return;
+        if (mongoose.connection.readyState >= 1) return true;
         try {
             await mongoose.connect(MONGODB_URI);
             console.log("Connected to MongoDB Atlas");
+            return true;
         } catch (err) {
             console.error("MongoDB Connection Error:", err);
+            return false;
         }
     }
+    return false;
 }
 
 // Memory / DB Data Methods
 export const db = {
     async getProducts() {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                let prods = await ProductModel.find().lean();
+                if (!prods || prods.length === 0) {
+                    await ProductModel.insertMany(initialProducts);
+                    prods = initialProducts;
+                }
+                return prods.map((p: any) => ({ ...p, id: p.id || p._id?.toString(), _id: p._id?.toString() }));
+            } catch (err) {
+                console.error("Error getting products from MongoDB", err);
+            }
+        }
         return globalStore.products;
     },
+
     async getProductById(id: string) {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                const prod = await ProductModel.findOne({ $or: [{ id }, { _id: mongoose.Types.ObjectId.isValid(id) ? id : null }] }).lean();
+                if (prod) return { ...prod, id: prod.id || prod._id?.toString(), _id: prod._id?.toString() };
+            } catch { }
+        }
         return globalStore.products.find(p => p.id === id || p._id === id);
     },
+
     async createProduct(data: any) {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        const id = `prod-${Date.now()}`;
         const newProduct = {
-            id: `prod-${Date.now()}`,
-            _id: `prod-${Date.now()}`,
+            id,
             createdAt: new Date().toISOString(),
             isFeatured: false,
             isBestSeller: false,
@@ -244,11 +281,35 @@ export const db = {
             numReviews: 1,
             ...data
         };
+
+        if (isDbConnected) {
+            try {
+                const created = await ProductModel.create(newProduct);
+                return { ...created.toObject(), id: created.id || created._id.toString(), _id: created._id.toString() };
+            } catch (err) {
+                console.error("Error creating product in MongoDB", err);
+            }
+        }
+
         globalStore.products.unshift(newProduct);
         return newProduct;
     },
+
     async updateProduct(id: string, data: any) {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                const updated = await ProductModel.findOneAndUpdate(
+                    { $or: [{ id }, { _id: mongoose.Types.ObjectId.isValid(id) ? id : null }] },
+                    { $set: data },
+                    { new: true }
+                ).lean();
+                if (updated) return { ...updated, id: updated.id || updated._id?.toString(), _id: updated._id?.toString() };
+            } catch (err) {
+                console.error("Error updating product in MongoDB", err);
+            }
+        }
+
         const index = globalStore.products.findIndex(p => p.id === id || p._id === id);
         if (index !== -1) {
             globalStore.products[index] = { ...globalStore.products[index], ...data };
@@ -256,49 +317,114 @@ export const db = {
         }
         return null;
     },
+
     async deleteProduct(id: string) {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                await ProductModel.deleteOne({ $or: [{ id }, { _id: mongoose.Types.ObjectId.isValid(id) ? id : null }] });
+                return true;
+            } catch { }
+        }
         globalStore.products = globalStore.products.filter(p => p.id !== id && p._id !== id);
         return true;
     },
 
     async getSettings() {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                let settingsDoc = await SettingModel.findOne().lean();
+                if (!settingsDoc) {
+                    settingsDoc = await SettingModel.create(initialSettings);
+                }
+                return { ...initialSettings, ...settingsDoc };
+            } catch (err) {
+                console.error("Error getting settings from MongoDB", err);
+            }
+        }
         return globalStore.settings;
     },
+
     async updateSettings(data: any) {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                const updatedDoc = await SettingModel.findOneAndUpdate(
+                    {},
+                    { $set: data },
+                    { upsert: true, new: true }
+                ).lean();
+                return { ...initialSettings, ...updatedDoc };
+            } catch (err) {
+                console.error("Error updating settings in MongoDB", err);
+            }
+        }
+
         globalStore.settings = { ...globalStore.settings, ...data };
         return globalStore.settings;
     },
 
     async getOrders() {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                let orders = await OrderModel.find().sort({ createdAt: -1 }).lean();
+                if (!orders || orders.length === 0) {
+                    await OrderModel.insertMany(initialOrders);
+                    orders = initialOrders;
+                }
+                return orders.map((o: any) => ({ ...o, _id: o._id?.toString() }));
+            } catch (err) {
+                console.error("Error getting orders from MongoDB", err);
+            }
+        }
         return globalStore.orders;
     },
+
     async createOrder(orderData: any) {
-        await connectDB();
+        const isDbConnected = await connectDB();
         const newOrder = {
-            _id: `ord-${Date.now()}`,
             createdAt: new Date().toISOString(),
             status: orderData.orderType === "pos_kiosk" ? "Delivered" : "Processing",
             ...orderData
         };
-        globalStore.orders.unshift(newOrder);
 
-        // Auto decrement stock for items ordered
+        if (isDbConnected) {
+            try {
+                const created = await OrderModel.create(newOrder);
+                return { ...created.toObject(), _id: created._id.toString() };
+            } catch (err) {
+                console.error("Error creating order in MongoDB", err);
+            }
+        }
+
+        const fallbackOrder = { _id: `ord-${Date.now()}`, ...newOrder };
+        globalStore.orders.unshift(fallbackOrder);
+
+        // Auto decrement stock
         if (Array.isArray(orderData.items)) {
             for (const item of orderData.items) {
                 const prod = globalStore.products.find(p => p.id === item.id || p._id === item.id || p.name === item.name);
-                if (prod) {
-                    prod.stock = Math.max(0, prod.stock - (item.quantity || 1));
-                }
+                if (prod) prod.stock = Math.max(0, prod.stock - (item.quantity || 1));
             }
         }
-        return newOrder;
+        return fallbackOrder;
     },
+
     async updateOrderStatus(id: string, status: string) {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                const updated = await OrderModel.findOneAndUpdate(
+                    { _id: mongoose.Types.ObjectId.isValid(id) ? id : null },
+                    { $set: { status } },
+                    { new: true }
+                ).lean();
+                if (updated) return { ...updated, _id: updated._id?.toString() };
+            } catch { }
+        }
+
         const order = globalStore.orders.find(o => o._id === id);
         if (order) {
             order.status = status;
@@ -306,8 +432,15 @@ export const db = {
         }
         return null;
     },
+
     async deleteOrder(id: string) {
-        await connectDB();
+        const isDbConnected = await connectDB();
+        if (isDbConnected) {
+            try {
+                await OrderModel.deleteOne({ _id: mongoose.Types.ObjectId.isValid(id) ? id : null });
+                return true;
+            } catch { }
+        }
         globalStore.orders = globalStore.orders.filter(o => o._id !== id);
         return true;
     }
