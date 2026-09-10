@@ -3,16 +3,20 @@
 import { motion } from "framer-motion";
 import TextReveal from "@/components/ui/TextReveal";
 import Link from "next/link";
+import { useSettings } from "@/components/providers/SettingsContext";
+import { getImageUrl } from "@/lib/api";
 
 export default function AboutPage() {
+    const { settings } = useSettings();
+
     return (
-        <div className="min-h-screen bg-background pt-32 pb-24 px-6 md:px-14">
+        <div className="min-h-screen bg-[#120F0D] text-[#EAE4D9] pt-32 pb-24 px-6 md:px-14">
             <div className="max-w-4xl mx-auto space-y-16">
                 
                 <div className="text-center space-y-6">
-                    <span className="text-primary uppercase tracking-[0.3em] text-sm font-medium">Our Story</span>
-                    <h1 className="text-5xl md:text-7xl font-serif leading-tight">
-                        <TextReveal>The 4-Year Grind (2022)</TextReveal>
+                    <span className="text-[#C89D54] uppercase tracking-[0.3em] text-xs font-mono">Our Heritage</span>
+                    <h1 className="text-4xl md:text-6xl font-serif leading-tight font-bold text-[#EAE4D9]">
+                        <TextReveal>Artisanal Mastery & Quiet Patience</TextReveal>
                     </h1>
                 </div>
 
@@ -20,28 +24,33 @@ export default function AboutPage() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.8 }}
-                    className="prose prose-lg mx-auto text-muted-foreground"
+                    className="space-y-6 text-[#EAE4D9]/70 leading-relaxed font-light text-sm md:text-base max-w-3xl mx-auto"
                 >
-                    <p className="leading-relaxed">
-                        Four years ago, Escensio started with a simple but powerful belief: Great things take time, and true quality cannot be rushed. In 2022, we set out to craft luxury fragrances that could stand proudly alongside international standards.
+                    <p>
+                        ESCENSIO was established with a singular belief: Authentic luxury cannot be rushed. Since 2022, our atelier has focused on mastering the quiet art of haute parfumerie through small-batch maturation and raw botanical extraction.
                     </p>
-                    <p className="leading-relaxed">
-                        For four long years, we poured absolute dedication, endless trials, and pure hard work into this brand. We didn’t focus on shortcuts; we focused on mastering formulations, perfecting our clean design aesthetic, and earning the trust of our community, drop by drop.
+                    <p>
+                        We shun artificial shortcuts in favor of patience. Every formulation is aged six weeks in wooden conditioning casks, allowing rare agarwood, Madagascan vanilla, and Kashmiri saffron to interweave harmoniously.
                     </p>
                 </motion.div>
 
                 <motion.div 
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4, duration: 0.8 }}
-                    className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl my-16"
+                    className="relative aspect-video rounded-2xl overflow-hidden border border-[#C89D54]/30 shadow-2xl my-16 bg-black"
                 >
-                    <img src="/hero-new.jpg" alt="Escensio Fragrance" className="w-full h-full object-cover" />
+                    <img
+                        src={getImageUrl(settings.aboutHeroImage || "/hero-new.jpg")}
+                        alt="Escensio Fragrance"
+                        className="w-full h-full object-cover opacity-90"
+                    />
                 </motion.div>
 
-                <div className="text-center space-y-6">
-                    <h2 className="text-4xl md:text-5xl font-serif leading-tight">
-                        The Milestone: Wah Cantt (2026)
+                <div className="text-center space-y-4">
+                    <span className="text-[#C89D54] font-mono text-xs uppercase tracking-[0.25em]">Physical Boutique</span>
+                    <h2 className="text-3xl md:text-5xl font-serif leading-tight font-bold text-[#EAE4D9]">
+                        Wah Cantt Flagship Kiosk
                     </h2>
                 </div>
 
@@ -49,16 +58,10 @@ export default function AboutPage() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6, duration: 0.8 }}
-                    className="prose prose-lg mx-auto text-muted-foreground"
+                    className="space-y-6 text-[#EAE4D9]/70 leading-relaxed font-light text-sm md:text-base max-w-3xl mx-auto"
                 >
-                    <p className="leading-relaxed">
-                        The biggest lesson we learned over these four years of hard work is that consistency always rewards you. Today, that journey of patience and grit has culminated into our proudest moment yet.
-                    </p>
-                    <p className="leading-relaxed font-medium text-foreground">
-                        After four years of digital growth, we have finally opened our very first physical outlet in Wah Cantt.
-                    </p>
-                    <p className="leading-relaxed">
-                        This storefront is the living reality of our four-year grind. It is a minimalist space designed for you to walk in, experience the craftsmanship in person, and feel the luxury we have been passionately bottling since day one.
+                    <p>
+                        Today, our journey comes alive at our physical kiosk at POF Skating Park, Wah Cantt. Designed with minimalist wooden aesthetics, it is a space for fragrance connoisseurs to experience raw ingredients and test artisanal extraits in person.
                     </p>
                 </motion.div>
 
@@ -66,15 +69,17 @@ export default function AboutPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8, duration: 1 }}
-                    className="text-center pt-16 border-t border-border mt-16 space-y-4"
+                    className="text-center pt-16 border-t border-[#332A22] mt-16 space-y-4"
                 >
-                    <img src="/logo.png" alt="Escensio Logo" className="h-16 mx-auto mb-6 dark:invert" />
-                    <p className="text-xl font-serif font-medium text-foreground">Escensio</p>
-                    <p className="text-muted-foreground tracking-widest uppercase text-sm">4 Years of Grit. Lifetimes of Elegance. Since 2022.</p>
+                    <img src="/logo.png" alt="Escensio Logo" className="h-14 mx-auto mb-4" />
+                    <p className="text-xl font-serif font-bold text-[#C89D54]">{settings.storeName || "ESCENSIO"}</p>
+                    <p className="text-[#EAE4D9]/40 font-mono tracking-[0.2em] uppercase text-xs">
+                        {settings.storeTagline || "Artisanal Haute Parfumerie • Established 2022"}
+                    </p>
                     
-                    <div className="pt-8">
-                        <Link href="/shop" className="btn btn-primary rounded-full px-8">
-                            Experience The Collection
+                    <div className="pt-6">
+                        <Link href="/shop" className="inline-block bg-[#C89D54] hover:bg-[#b08743] text-black font-semibold px-8 py-3.5 rounded-sm text-xs uppercase tracking-[0.2em] transition-all">
+                            Explore Fragrance Catalog
                         </Link>
                     </div>
                 </motion.div>

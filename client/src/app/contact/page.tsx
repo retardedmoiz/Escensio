@@ -2,121 +2,114 @@
 
 import TextReveal from "@/components/ui/TextReveal";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
-import { useState, useEffect } from "react";
-import API_URL from "@/lib/api";
+import { useSettings } from "@/components/providers/SettingsContext";
+import { getImageUrl } from "@/lib/api";
 
 export default function ContactPage() {
-    const [settings, setSettings] = useState<any>({});
-    useEffect(() => {
-        fetch(`${API_URL}/api/settings`, { cache: 'no-store' })
-            .then(res => res.json())
-            .then(data => setSettings(data))
-            .catch(() => {});
-    }, []);
+    const { settings } = useSettings();
 
     return (
-        <div className="min-h-screen bg-background pt-32 pb-20 px-6 max-w-7xl mx-auto">
-            <div className="text-center space-y-4 mb-20">
-                <span className="text-primary uppercase tracking-[0.3em] text-sm font-medium">Get in Touch</span>
-                <h1 className="text-5xl md:text-7xl font-bold font-serif leading-tight">
-                    <TextReveal>Contact & Locations</TextReveal>
+        <div className="min-h-screen bg-[#120F0D] text-[#EAE4D9] pt-32 pb-20 px-6 max-w-7xl mx-auto space-y-16">
+            <div className="text-center space-y-4">
+                <span className="text-[#C89D54] uppercase tracking-[0.3em] text-xs font-mono">Boutique & Kiosks</span>
+                <h1 className="text-4xl md:text-6xl font-bold font-serif leading-tight text-[#EAE4D9]">
+                    <TextReveal>Contact & Physical Locations</TextReveal>
                 </h1>
-                <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                    Whether you have a question about our collections or want to experience our fragrances in person, we are here for you.
+                <p className="text-[#EAE4D9]/60 text-xs md:text-sm max-w-2xl mx-auto font-light leading-relaxed">
+                    Whether you wish to sample extraits in person at our Wah Cantt kiosk or submit a bespoke inquiry, we are at your service.
                 </p>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-16">
+            {/* Banner Image */}
+            <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden border border-[#C89D54]/30 bg-black shadow-2xl">
+                <img
+                    src={getImageUrl(settings.contactBannerImage || "/products/perfume-4.jpg")}
+                    alt="ESCENSIO Kiosk Location"
+                    className="w-full h-full object-cover opacity-80"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#120F0D] via-black/40 to-transparent flex items-end p-8">
+                    <div>
+                        <span className="text-[#C89D54] text-xs font-mono uppercase tracking-[0.2em]">Operational Counter</span>
+                        <h2 className="text-2xl font-serif font-bold text-white">POF Skating Park, Wah Cantt</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-12">
                 {/* Contact Form */}
-                <div className="bg-card p-10 rounded-2xl border border-border/40 shadow-sm">
-                    <h2 className="text-3xl font-serif mb-6">Send us a Message</h2>
-                    <form className="space-y-6">
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">First Name</label>
-                                <input type="text" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-primary transition-colors" placeholder="John" />
+                <div className="bg-[#181410] p-8 md:p-10 rounded-2xl border border-[#332A22] shadow-xl space-y-6">
+                    <h2 className="text-2xl font-serif text-[#C89D54] font-bold">Send an Atelier Message</h2>
+                    <form className="space-y-4 text-xs">
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-[#EAE4D9]/70 font-medium">First Name</label>
+                                <input type="text" className="w-full bg-black/50 border border-[#332A22] rounded-xl px-4 py-3 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]" placeholder="John" />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Last Name</label>
-                                <input type="text" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-primary transition-colors" placeholder="Doe" />
+                            <div className="space-y-1">
+                                <label className="text-[#EAE4D9]/70 font-medium">Last Name</label>
+                                <input type="text" className="w-full bg-black/50 border border-[#332A22] rounded-xl px-4 py-3 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]" placeholder="Doe" />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Email Address</label>
-                            <input type="email" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-primary transition-colors" placeholder="john@example.com" />
+                        <div className="space-y-1">
+                            <label className="text-[#EAE4D9]/70 font-medium">Email Address</label>
+                            <input type="email" className="w-full bg-black/50 border border-[#332A22] rounded-xl px-4 py-3 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]" placeholder="john@example.com" />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Message</label>
-                            <textarea rows={5} className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-primary transition-colors resize-none" placeholder="How can we help you?"></textarea>
+                        <div className="space-y-1">
+                            <label className="text-[#EAE4D9]/70 font-medium">Message</label>
+                            <textarea rows={4} className="w-full bg-black/50 border border-[#332A22] rounded-xl px-4 py-3 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54] resize-none" placeholder="How may we assist your fragrance inquiry?"></textarea>
                         </div>
-                        <button type="button" className="w-full bg-primary text-primary-foreground font-medium py-4 rounded-lg hover:bg-primary/90 transition-colors">
-                            Send Message
+                        <button type="button" className="w-full bg-[#C89D54] hover:bg-[#b08743] text-black font-bold py-3.5 rounded-sm text-xs uppercase tracking-[0.2em] transition-all">
+                            Submit Inquiry
                         </button>
                     </form>
                 </div>
 
                 {/* Locations & Info */}
-                <div className="space-y-12">
+                <div className="space-y-8 bg-[#181410] p-8 md:p-10 rounded-2xl border border-[#332A22] shadow-xl flex flex-col justify-between">
                     <div>
-                        <h2 className="text-3xl font-serif mb-6">Physical Locations</h2>
-                        <div className="space-y-8">
+                        <h2 className="text-2xl font-serif text-[#C89D54] font-bold mb-6">Boutique & Kiosks</h2>
+                        <div className="space-y-6">
                             <div className="flex gap-4 items-start">
-                                <div className="p-3 bg-primary/10 text-primary rounded-full shrink-0">
-                                    <MapPin className="w-6 h-6" />
+                                <div className="p-3 bg-black border border-[#C89D54]/30 text-[#C89D54] rounded-xl shrink-0">
+                                    <MapPin className="w-5 h-5" />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-serif mb-2">Escensio Kiosk 1</h3>
-                                    <p className="text-muted-foreground">POF Skating Park<br/>Wah Cantt, Pakistan</p>
+                                <div className="space-y-1 text-xs">
+                                    <h3 className="text-base font-serif font-bold text-[#EAE4D9]">Wah Cantt Store Kiosk</h3>
+                                    <p className="text-[#EAE4D9]/60">{settings.storeAddress || "POF Skating Park, Wah Cantt, Pakistan"}</p>
+                                    <p className="text-[#C89D54] font-mono font-semibold">Open Daily: 12:00 PM – 10:00 PM</p>
                                 </div>
                             </div>
-                            <div className="flex gap-4 items-start">
-                                <div className="p-3 bg-primary/10 text-primary rounded-full shrink-0 relative overflow-hidden">
-                                    <MapPin className="w-6 h-6" />
+
+                            <div className="flex gap-4 items-start pt-4 border-t border-[#332A22]">
+                                <div className="p-3 bg-black border border-[#332A22] text-[#EAE4D9]/40 rounded-xl shrink-0">
+                                    <MapPin className="w-5 h-5" />
                                 </div>
-                                <div>
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h3 className="text-xl font-serif">Escensio Kiosk 2</h3>
-                                        <span className="flex items-center gap-2 px-2.5 py-1 bg-red-500/10 text-red-500 text-xs font-semibold uppercase tracking-widest rounded-full">
-                                            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping absolute"></span>
-                                            <span className="w-2 h-2 rounded-full bg-red-500 relative"></span>
-                                            Coming Soon
-                                        </span>
-                                    </div>
-                                    <p className="text-muted-foreground">Location to be announced<br/>Stay tuned!</p>
+                                <div className="space-y-1 text-xs">
+                                    <h3 className="text-base font-serif font-bold text-[#EAE4D9]">Kiosk #02 Boutique</h3>
+                                    <p className="text-[#EAE4D9]/40">Upcoming Flagship Location</p>
+                                    <p className="text-[#C89D54]/60 font-mono">Opening Soon</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="pt-8 border-t border-border/40">
-                        <h2 className="text-3xl font-serif mb-6">Direct Contact</h2>
-                        <div className="space-y-6">
-                            <div className="flex gap-4 items-center">
-                                <div className="p-3 bg-muted rounded-full shrink-0">
-                                    <Phone className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wider">Phone / WhatsApp</p>
-                                    <p className="font-medium">{settings?.storePhone || "+92 311 0043738"}</p>
-                                </div>
+                    <div className="pt-6 border-t border-[#332A22] space-y-4 text-xs font-mono">
+                        <div className="flex items-center gap-3">
+                            <Phone className="w-4 h-4 text-[#C89D54]" />
+                            <div>
+                                <span className="text-[#EAE4D9]/40 block text-[10px] uppercase">Direct Phone / WhatsApp</span>
+                                <a href={`https://wa.me/${settings.whatsappNumber || "923001234567"}`} className="text-[#EAE4D9] hover:text-[#C89D54]">
+                                    {settings.storePhone || "+92 300 1234567"}
+                                </a>
                             </div>
-                            <div className="flex gap-4 items-center">
-                                <div className="p-3 bg-muted rounded-full shrink-0">
-                                    <Mail className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wider">Email</p>
-                                    <p className="font-medium">{settings?.storeEmail || "Support@ecsensiofragrance.com"}</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4 items-center">
-                                <div className="p-3 bg-muted rounded-full shrink-0">
-                                    <Clock className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wider">Hours</p>
-                                    <p className="font-medium">Mon - Sun: 10AM - 10PM</p>
-                                </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Mail className="w-4 h-4 text-[#C89D54]" />
+                            <div>
+                                <span className="text-[#EAE4D9]/40 block text-[10px] uppercase">Email Inquiries</span>
+                                <a href={`mailto:${settings.storeEmail || "hello@escensio.com"}`} className="text-[#EAE4D9] hover:text-[#C89D54]">
+                                    {settings.storeEmail || "hello@escensio.com"}
+                                </a>
                             </div>
                         </div>
                     </div>

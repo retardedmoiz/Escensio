@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/components/providers/CartContext";
+import { useSettings } from "../providers/SettingsContext";
 
 interface ProductCardProps {
     id: string | number;
@@ -20,13 +21,14 @@ export default function ProductCard({ id, title, price, image, category, classNa
     const ref = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const { addItem } = useCart();
+    const { settings } = useSettings();
 
     const x = useMotionValue(0);
     const y = useMotionValue(0);
     const mouseX = useSpring(x, { stiffness: 120, damping: 18 });
     const mouseY = useSpring(y, { stiffness: 120, damping: 18 });
-    const rotateX = useTransform(mouseY, [-0.5, 0.5], ["8deg", "-8deg"]);
-    const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-8deg", "8deg"]);
+    const rotateX = useTransform(mouseY, [-0.5, 0.5], ["6deg", "-6deg"]);
+    const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-6deg", "6deg"]);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!ref.current) return;
@@ -43,7 +45,7 @@ export default function ProductCard({ id, title, price, image, category, classNa
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.stopPropagation();
-        addItem({ id: Number(id), title, price, image });
+        addItem({ id: Number(id) || 1, title, price, image });
     };
 
     return (
@@ -54,50 +56,45 @@ export default function ProductCard({ id, title, price, image, category, classNa
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
             className={cn(
-                "relative w-full aspect-[3/4] rounded-sm bg-card text-card-foreground cursor-pointer group",
+                "relative w-full aspect-[3/4] rounded-xl bg-[#181410] border border-[#332A22] text-[#EAE4D9] cursor-pointer group shadow-xl",
                 "perspective-1000",
                 className
             )}
         >
-            {/* Image */}
+            {/* Image Container */}
             <div
                 style={{ transform: "translateZ(0)" }}
-                className="absolute inset-0 rounded-sm overflow-hidden bg-muted product-img-wrap"
+                className="absolute inset-0 rounded-xl overflow-hidden bg-black"
             >
-                <Image
-                    src={image}
+                <img
+                    src={image || "/products/perfume-1.jpg"}
                     alt={title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover opacity-85 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#120F0D] via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
             </div>
 
             {/* Info overlay */}
             <div
-                style={{ transform: "translateZ(30px)" }}
-                className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 group-hover:translate-y-0 transition-transform duration-400"
+                style={{ transform: "translateZ(25px)" }}
+                className="absolute bottom-0 left-0 right-0 p-4 translate-y-1 group-hover:translate-y-0 transition-transform duration-400"
             >
-                <div className="bg-background/90 backdrop-blur-md px-4 py-3 rounded-sm border border-border/30 shadow-lg">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-[0.25em]">{category}</span>
-                    <h3 className="text-base font-serif font-medium mt-0.5 truncate">{title}</h3>
-                    <div className="flex items-center justify-between mt-2">
-                        <p className="text-sm font-medium">Rs. {price.toLocaleString()}</p>
+                <div className="bg-[#120F0D]/95 backdrop-blur-md px-4 py-3 rounded-lg border border-[#C89D54]/30 shadow-2xl space-y-1">
+                    <span className="text-[9px] text-[#C89D54] font-mono uppercase tracking-[0.25em]">{category}</span>
+                    <h3 className="text-sm font-serif font-bold text-[#EAE4D9] truncate">{title}</h3>
+                    <div className="flex items-center justify-between pt-1 border-t border-[#332A22] mt-1">
+                        <p className="text-xs font-mono font-bold text-[#C89D54]">
+                            {settings.currencySymbol || "Rs."} {price.toLocaleString()}
+                        </p>
                         <button
                             onClick={handleAddToCart}
-                            className="text-[10px] uppercase tracking-[0.2em] px-3 py-1.5 bg-foreground text-background rounded-sm hover:opacity-80 transition-opacity font-medium"
+                            className="text-[10px] uppercase tracking-[0.15em] px-3 py-1 bg-[#C89D54] hover:bg-[#b08743] text-black font-bold rounded-sm transition-colors"
                         >
                             Add
                         </button>
                     </div>
                 </div>
             </div>
-
-            {/* Sheen */}
-            <div
-                className="absolute inset-0 rounded-sm bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                style={{ transform: "translateZ(20px)" }}
-            />
         </motion.div>
     );
 }

@@ -1,68 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Save, Globe, Phone, Mail, MapPin, Instagram, Facebook, Twitter, DollarSign, MessageCircle, Megaphone, AlertCircle, Image as ImageIcon, Upload, Eye, Check } from "lucide-react";
+import { useState } from "react";
+import { Save, Globe, Phone, Mail, MapPin, Instagram, Facebook, Twitter, DollarSign, MessageCircle, Megaphone, Image as ImageIcon, Upload, Eye, Check, RefreshCw } from "lucide-react";
 import API_URL, { getImageUrl } from "@/lib/api";
+import { useSettings } from "@/components/providers/SettingsContext";
 
 const PRESET_HERO_IMAGES = [
-    { title: "Midnight Luxury", url: "/hero-new.jpg" },
-    { title: "Gold & Amber Perfume", url: "/products/perfume-3.jpg" },
-    { title: "Floral Serenity", url: "/products/perfume-2.jpg" },
-    { title: "Ocean Breeze Fragrance", url: "/products/perfume-4.jpg" },
+    { title: "Midnight Cedarwood", url: "/hero-new.jpg" },
+    { title: "Amber & Botanical Oud", url: "/products/perfume-3.jpg" },
+    { title: "Floral Jasmine Atelier", url: "/products/perfume-2.jpg" },
+    { title: "Aquatic Marine Breeze", url: "/products/perfume-4.jpg" },
 ];
 
 export default function AdminSettings() {
-    const [settings, setSettings] = useState<any>({
-        storeName: "ESCENSIO",
-        storeTagline: "The Essence of Luxury Fragrances",
-        heroTitle: "ESCENSIO",
-        heroSubtitle: "Crafted for those who appreciate elegance. Experience luxury, confidence, and individuality — in every spray.",
-        heroImage: "/hero-new.jpg",
-        announcementBar: "✨ Special Offer: Free Complimentary 10ml Discovery Sample on Orders Over Rs. 15,000 | Visit Wah Cantt Kiosk",
-        announcementEnabled: true,
-        currency: "PKR",
-        currencySymbol: "Rs.",
-        taxRatePercentage: 5,
-        storeEmail: "hello@escensio.com",
-        storePhone: "+92 300 1234567",
-        storeAddress: "POF Skating Park, Wah Cantt, Pakistan",
-        whatsappNumber: "923001234567",
-        marqueeText: "FREE EXPRESS SHIPPING ACROSS PAKISTAN • HANDCRAFTED PERFUMERY • KIOSK WAH CANTT • ESCENSIO LUXURY",
-    });
-    const [loading, setLoading] = useState(true);
+    const { settings, updateSettings } = useSettings();
+    const [localSettings, setLocalSettings] = useState<any>(settings);
     const [saving, setSaving] = useState(false);
     const [savedMsg, setSavedMsg] = useState("");
     const [previewTab, setPreviewTab] = useState<"edit" | "preview">("edit");
 
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const res = await fetch(`${API_URL}/api/settings`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setSettings((prev: any) => ({ ...prev, ...data }));
-                }
-            } catch (err) {
-                console.error("Settings load error", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        load();
-    }, []);
-
-    const set = (key: string, val: any) => setSettings((prev: any) => ({ ...prev, [key]: val }));
+    const set = (key: string, val: any) => {
+        setLocalSettings((prev: any) => ({ ...prev, [key]: val }));
+    };
 
     const handleSave = async () => {
         setSaving(true);
         try {
-            const res = await fetch(`${API_URL}/api/settings`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(settings)
-            });
-            if (res.ok) {
-                setSavedMsg("Website settings saved successfully!");
+            const success = await updateSettings(localSettings);
+            if (success) {
+                setSavedMsg("Settings and imagery updated in real-time across all pages.");
                 setTimeout(() => setSavedMsg(""), 4000);
             }
         } catch (err) {
@@ -92,82 +58,72 @@ export default function AdminSettings() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="admin-page p-6 text-white/50 text-xs">
-                Loading site configuration...
-            </div>
-        );
-    }
-
     return (
         <div className="admin-page space-y-6">
             {/* Header */}
-            <div className="admin-page-header flex justify-between items-center pb-4 border-b border-white/10">
+            <div className="admin-page-header flex justify-between items-center pb-4 border-b border-[#332A22]">
                 <div>
-                    <h1 className="admin-page-title text-2xl font-serif font-bold text-amber-400 flex items-center gap-2">
-                        <Globe className="w-6 h-6" /> Website Settings & Hero Changer
+                    <h1 className="admin-page-title text-2xl font-serif font-bold text-[#C89D54] flex items-center gap-2">
+                        <Globe className="w-6 h-6" /> Site Settings & Master Image Control
                     </h1>
-                    <p className="admin-page-subtitle text-xs text-white/60">
-                        Dynamic Control Over Hero Imagery, Announcement Banners & Brand Details
+                    <p className="admin-page-subtitle text-xs text-[#EAE4D9]/60">
+                        Manage Real-Time Imagery & Brand Content Across Every Page
                     </p>
                 </div>
                 <div className="flex gap-3">
                     <button
                         onClick={() => setPreviewTab(previewTab === "edit" ? "preview" : "edit")}
-                        className="px-3.5 py-2 rounded-xl bg-zinc-900 border border-white/15 hover:border-white/30 text-xs text-white flex items-center gap-1.5"
+                        className="px-3.5 py-2 rounded-xl bg-[#1A1612] border border-[#C89D54]/30 hover:border-[#C89D54]/60 text-xs text-[#EAE4D9] flex items-center gap-1.5 transition-all"
                     >
-                        <Eye className="w-4 h-4 text-amber-400" /> {previewTab === "edit" ? "Hero Live Preview" : "Back to Edit"}
+                        <Eye className="w-4 h-4 text-[#C89D54]" /> {previewTab === "edit" ? "Hero Live Preview" : "Back to Edit"}
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-400/20"
+                        className="px-4 py-2 rounded-xl bg-[#C89D54] hover:bg-[#b08743] disabled:opacity-50 text-black font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-[#C89D54]/10 transition-all"
                     >
-                        <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save All Settings"}
+                        <Save className="w-4 h-4" /> {saving ? "Updating..." : "Save All Changes"}
                     </button>
                 </div>
             </div>
 
             {savedMsg && (
-                <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs p-3.5 rounded-xl flex items-center gap-2">
+                <div className="bg-[#C89D54]/10 border border-[#C89D54]/30 text-[#C89D54] text-xs p-3.5 rounded-xl flex items-center gap-2">
                     <Check className="w-4 h-4" /> {savedMsg}
                 </div>
             )}
 
-            {/* LIVE HERO BANNER PREVIEW MODAL / SECTION */}
+            {/* LIVE HERO BANNER PREVIEW */}
             {previewTab === "preview" && (
-                <div className="bg-black border border-amber-400/30 rounded-2xl p-6 relative overflow-hidden shadow-2xl space-y-6">
-                    <div className="text-xs uppercase tracking-widest text-amber-400 font-bold flex items-center gap-2">
-                        <Eye className="w-4 h-4" /> Real-Time Storefront Hero Preview
+                <div className="bg-[#181410] border border-[#C89D54]/30 rounded-2xl p-6 relative overflow-hidden shadow-2xl space-y-6">
+                    <div className="text-xs uppercase tracking-widest text-[#C89D54] font-mono font-semibold flex items-center gap-2">
+                        <Eye className="w-4 h-4" /> Real-Time Storefront Preview
                     </div>
                     
-                    <div className="relative h-96 rounded-xl overflow-hidden flex items-center justify-center text-center p-6">
-                        {/* Background Image */}
+                    <div className="relative h-96 rounded-xl overflow-hidden flex items-center justify-center text-center p-6 bg-black">
                         <img
-                            src={getImageUrl(settings.heroImage)}
+                            src={getImageUrl(localSettings.heroImage)}
                             alt="Hero Background"
-                            className="absolute inset-0 w-full h-full object-cover opacity-50 blur-[1px]"
+                            className="absolute inset-0 w-full h-full object-cover opacity-45 blur-[1px]"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/90" />
 
-                        {/* Banner Text overlay */}
                         <div className="relative z-10 max-w-2xl space-y-4">
-                            {settings.announcementEnabled && settings.announcementBar && (
-                                <div className="inline-block bg-amber-400/10 border border-amber-400/30 text-amber-300 px-3 py-1 rounded-full text-[11px] font-mono mb-2">
-                                    {settings.announcementBar}
+                            {localSettings.announcementEnabled && localSettings.announcementBar && (
+                                <div className="inline-block bg-[#C89D54]/10 border border-[#C89D54]/30 text-[#C89D54] px-3 py-1 rounded-sm text-[11px] font-mono tracking-wider">
+                                    {localSettings.announcementBar}
                                 </div>
                             )}
-                            <h1 className="text-4xl md:text-6xl font-bold font-serif text-amber-400 tracking-wider">
-                                {settings.heroTitle || "ESCENSIO"}
+                            <h1 className="text-4xl md:text-6xl font-bold font-serif text-[#C89D54] tracking-wider">
+                                {localSettings.heroTitle || "ESCENSIO"}
                             </h1>
-                            <p className="text-white/80 text-xs md:text-sm max-w-lg mx-auto font-light leading-relaxed">
-                                {settings.heroSubtitle}
+                            <p className="text-[#EAE4D9]/80 text-xs md:text-sm max-w-lg mx-auto font-light leading-relaxed">
+                                {localSettings.heroSubtitle}
                             </p>
                             <div className="pt-2">
-                                <button className="bg-amber-400 text-black font-semibold px-6 py-2.5 rounded-full text-xs uppercase tracking-widest">
+                                <span className="inline-block bg-[#C89D54] text-black font-semibold px-6 py-2.5 rounded-sm text-xs uppercase tracking-widest">
                                     Explore Collection
-                                </button>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -177,51 +133,48 @@ export default function AdminSettings() {
             {/* Settings Form Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                {/* Hero Section & Imagery Control */}
-                <div className="bg-zinc-900 border border-white/10 rounded-2xl p-5 space-y-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-white/10">
-                        <ImageIcon className="w-5 h-5 text-amber-400" />
+                {/* 1. Homepage Hero & Banner */}
+                <div className="bg-[#181410] border border-[#332A22] rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-[#332A22]">
+                        <ImageIcon className="w-5 h-5 text-[#C89D54]" />
                         <div>
-                            <h2 className="font-serif font-bold text-white text-base">Homepage Hero & Imagery</h2>
-                            <p className="text-[11px] text-white/50">Change store banner picture, titles, and text</p>
+                            <h2 className="font-serif font-bold text-[#EAE4D9] text-base">Homepage Hero Banner</h2>
+                            <p className="text-[11px] text-[#EAE4D9]/50">Main hero image, title, and subtitle</p>
                         </div>
                     </div>
 
                     <div className="space-y-3 text-xs">
                         <div>
-                            <label className="text-white/70 block mb-1 font-medium">Hero Main Title</label>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Hero Title</label>
                             <input
                                 type="text"
-                                value={settings.heroTitle || ""}
+                                value={localSettings.heroTitle || ""}
                                 onChange={e => set("heroTitle", e.target.value)}
-                                className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]"
                             />
                         </div>
 
                         <div>
-                            <label className="text-white/70 block mb-1 font-medium">Hero Subtitle</label>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Hero Subtitle</label>
                             <textarea
                                 rows={2}
-                                value={settings.heroSubtitle || ""}
+                                value={localSettings.heroSubtitle || ""}
                                 onChange={e => set("heroSubtitle", e.target.value)}
-                                className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]"
                             />
                         </div>
 
-                        {/* Image Changer */}
                         <div>
-                            <label className="text-white/70 block mb-1 font-medium">Hero Background Image</label>
-                            
-                            {/* Current Image Preview */}
-                            <div className="relative h-32 rounded-xl overflow-hidden border border-white/15 mb-3 bg-black">
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Hero Background Image</label>
+                            <div className="relative h-32 rounded-xl overflow-hidden border border-[#332A22] mb-3 bg-black">
                                 <img
-                                    src={getImageUrl(settings.heroImage)}
+                                    src={getImageUrl(localSettings.heroImage)}
                                     alt="Hero Preview"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover opacity-80"
                                 />
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                    <label className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-4 py-2 rounded-xl cursor-pointer flex items-center gap-2 text-xs transition-all shadow-lg">
-                                        <Upload className="w-4 h-4" /> Upload New Hero Image
+                                    <label className="bg-[#C89D54] hover:bg-[#b08743] text-black font-bold px-4 py-2 rounded-xl cursor-pointer flex items-center gap-2 text-xs transition-all shadow-lg">
+                                        <Upload className="w-4 h-4" /> Upload Hero Image
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -232,17 +185,16 @@ export default function AdminSettings() {
                                 </div>
                             </div>
 
-                            {/* Preset Image Options */}
-                            <label className="text-white/50 block mb-1.5 text-[11px]">Or Select from Curated Luxury Presets:</label>
+                            <label className="text-[#EAE4D9]/50 block mb-1.5 text-[11px]">Select Preset Imagery:</label>
                             <div className="grid grid-cols-4 gap-2">
                                 {PRESET_HERO_IMAGES.map((preset, i) => (
                                     <div
                                         key={i}
                                         onClick={() => set("heroImage", preset.url)}
                                         className={`relative h-16 rounded-lg overflow-hidden cursor-pointer border transition-all ${
-                                            settings.heroImage === preset.url
-                                                ? "border-amber-400 ring-2 ring-amber-400/50"
-                                                : "border-white/10 opacity-70 hover:opacity-100"
+                                            localSettings.heroImage === preset.url
+                                                ? "border-[#C89D54] ring-2 ring-[#C89D54]/50"
+                                                : "border-[#332A22] opacity-70 hover:opacity-100"
                                         }`}
                                     >
                                         <img src={preset.url} alt={preset.title} className="w-full h-full object-cover" />
@@ -253,134 +205,187 @@ export default function AdminSettings() {
                     </div>
                 </div>
 
-                {/* Announcement Bar & Marquee */}
-                <div className="bg-zinc-900 border border-white/10 rounded-2xl p-5 space-y-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-white/10">
-                        <Megaphone className="w-5 h-5 text-amber-400" />
+                {/* 2. Collection Categories Imagery (Shop Banners) */}
+                <div className="bg-[#181410] border border-[#332A22] rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-[#332A22]">
+                        <ImageIcon className="w-5 h-5 text-[#C89D54]" />
                         <div>
-                            <h2 className="font-serif font-bold text-white text-base">Announcement & Marquee Banners</h2>
-                            <p className="text-[11px] text-white/50">Header notification text and sliding store notice</p>
+                            <h2 className="font-serif font-bold text-[#EAE4D9] text-base">Collection Category Imagery</h2>
+                            <p className="text-[11px] text-[#EAE4D9]/50">Card images for shop collections</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                        {[
+                            { label: "Category 1 (Floral Serenity)", key: "category1Image" },
+                            { label: "Category 2 (Wood & Spice)", key: "category2Image" },
+                            { label: "Category 3 (Ocean Breeze)", key: "category3Image" },
+                            { label: "Category 4 (Amber Oud)", key: "category4Image" },
+                        ].map(cat => (
+                            <div key={cat.key} className="space-y-1">
+                                <label className="text-[#EAE4D9]/70 block truncate text-[11px]">{cat.label}</label>
+                                <div className="relative h-24 rounded-lg overflow-hidden border border-[#332A22] bg-black">
+                                    <img src={getImageUrl(localSettings[cat.key])} alt="" className="w-full h-full object-cover" />
+                                    <label className="absolute bottom-1 right-1 bg-[#181410]/90 text-[#C89D54] border border-[#C89D54]/30 px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-[#C89D54] hover:text-black transition-colors">
+                                        Change
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={e => handleImageUpload(e, cat.key)}
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 3. Page Imagery (About, Customise, Contact) */}
+                <div className="bg-[#181410] border border-[#332A22] rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-[#332A22]">
+                        <ImageIcon className="w-5 h-5 text-[#C89D54]" />
+                        <div>
+                            <h2 className="font-serif font-bold text-[#EAE4D9] text-base">Page Banners (About, Customise, Contact)</h2>
+                            <p className="text-[11px] text-[#EAE4D9]/50">Imagery for story, custom atelier, and kiosk page</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                        {[
+                            { label: "About Page Story Banner", key: "aboutHeroImage" },
+                            { label: "Craftsmanship Artisan Image", key: "aboutCraftImage" },
+                            { label: "Custom Perfume Atelier Image", key: "customiseBannerImage" },
+                            { label: "Contact Kiosk Store Banner", key: "contactBannerImage" },
+                        ].map(page => (
+                            <div key={page.key} className="space-y-1">
+                                <label className="text-[#EAE4D9]/70 block truncate text-[11px]">{page.label}</label>
+                                <div className="relative h-24 rounded-lg overflow-hidden border border-[#332A22] bg-black">
+                                    <img src={getImageUrl(localSettings[page.key])} alt="" className="w-full h-full object-cover" />
+                                    <label className="absolute bottom-1 right-1 bg-[#181410]/90 text-[#C89D54] border border-[#C89D54]/30 px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-[#C89D54] hover:text-black transition-colors">
+                                        Change
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={e => handleImageUpload(e, page.key)}
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 4. Announcement & Marquee */}
+                <div className="bg-[#181410] border border-[#332A22] rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-[#332A22]">
+                        <Megaphone className="w-5 h-5 text-[#C89D54]" />
+                        <div>
+                            <h2 className="font-serif font-bold text-[#EAE4D9] text-base">Announcements & Marquee</h2>
+                            <p className="text-[11px] text-[#EAE4D9]/50">Header message banner and marquee ticker</p>
                         </div>
                     </div>
 
                     <div className="space-y-3 text-xs">
                         <div>
-                            <label className="text-white/70 block mb-1 font-medium">Header Announcement Bar Text</label>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Announcement Bar Text</label>
                             <input
                                 type="text"
-                                value={settings.announcementBar || ""}
+                                value={localSettings.announcementBar || ""}
                                 onChange={e => set("announcementBar", e.target.value)}
-                                className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]"
                             />
                         </div>
 
                         <label className="flex items-center gap-2 cursor-pointer pt-1">
                             <input
                                 type="checkbox"
-                                checked={settings.announcementEnabled || false}
+                                checked={localSettings.announcementEnabled || false}
                                 onChange={e => set("announcementEnabled", e.target.checked)}
-                                className="w-4 h-4 accent-amber-400 rounded"
+                                className="w-4 h-4 accent-[#C89D54] rounded"
                             />
-                            <span className="text-white/80">Display Announcement Bar on Storefront Header</span>
+                            <span className="text-[#EAE4D9]/80">Show Announcement Bar on Header</span>
                         </label>
 
-                        <div className="pt-2 border-t border-white/10">
-                            <label className="text-white/70 block mb-1 font-medium">Marquee Scrolling Text</label>
+                        <div className="pt-2 border-t border-[#332A22]">
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Marquee Scrolling Banner</label>
                             <textarea
                                 rows={2}
-                                value={settings.marqueeText || ""}
+                                value={localSettings.marqueeText || ""}
                                 onChange={e => set("marqueeText", e.target.value)}
-                                className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]"
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Store Info & Currency */}
-                <div className="bg-zinc-900 border border-white/10 rounded-2xl p-5 space-y-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-white/10">
-                        <Globe className="w-5 h-5 text-amber-400" />
+                {/* 5. Brand Identity & Contact */}
+                <div className="bg-[#181410] border border-[#332A22] rounded-2xl p-5 space-y-4 md:col-span-2">
+                    <div className="flex items-center gap-2 pb-3 border-b border-[#332A22]">
+                        <Globe className="w-5 h-5 text-[#C89D54]" />
                         <div>
-                            <h2 className="font-serif font-bold text-white text-base">Store Identity & Currency</h2>
-                            <p className="text-[11px] text-white/50">Brand details, currency symbols, and tax rate</p>
+                            <h2 className="font-serif font-bold text-[#EAE4D9] text-base">Store Identity & Kiosk Location Details</h2>
+                            <p className="text-[11px] text-[#EAE4D9]/50">Brand title, phone, address, and WhatsApp order number</p>
                         </div>
                     </div>
 
-                    <div className="space-y-3 text-xs">
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-white/70 block mb-1 font-medium">Store Name</label>
-                                <input
-                                    type="text"
-                                    value={settings.storeName || ""}
-                                    onChange={e => set("storeName", e.target.value)}
-                                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-white/70 block mb-1 font-medium">Currency Symbol</label>
-                                <input
-                                    type="text"
-                                    value={settings.currencySymbol || "Rs."}
-                                    onChange={e => set("currencySymbol", e.target.value)}
-                                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 font-mono"
-                                />
-                            </div>
-                        </div>
-
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                         <div>
-                            <label className="text-white/70 block mb-1 font-medium">Store Tagline</label>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Store Name</label>
                             <input
                                 type="text"
-                                value={settings.storeTagline || ""}
+                                value={localSettings.storeName || ""}
+                                onChange={e => set("storeName", e.target.value)}
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Store Tagline</label>
+                            <input
+                                type="text"
+                                value={localSettings.storeTagline || ""}
                                 onChange={e => set("storeTagline", e.target.value)}
-                                className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]"
                             />
                         </div>
-                    </div>
-                </div>
-
-                {/* Contact & Social Links */}
-                <div className="bg-zinc-900 border border-white/10 rounded-2xl p-5 space-y-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-white/10">
-                        <Phone className="w-5 h-5 text-amber-400" />
                         <div>
-                            <h2 className="font-serif font-bold text-white text-base">Contact & WhatsApp Orders</h2>
-                            <p className="text-[11px] text-white/50">Store address, phone, and direct WhatsApp number</p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-3 text-xs">
-                        <div>
-                            <label className="text-white/70 block mb-1 font-medium">Store Address / Kiosk Location</label>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Currency Symbol</label>
                             <input
                                 type="text"
-                                value={settings.storeAddress || ""}
-                                onChange={e => set("storeAddress", e.target.value)}
-                                className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                                value={localSettings.currencySymbol || "Rs."}
+                                onChange={e => set("currencySymbol", e.target.value)}
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54] font-mono"
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-white/70 block mb-1 font-medium">Phone Number</label>
-                                <input
-                                    type="text"
-                                    value={settings.storePhone || ""}
-                                    onChange={e => set("storePhone", e.target.value)}
-                                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-white/70 block mb-1 font-medium">WhatsApp Number (with country code)</label>
-                                <input
-                                    type="text"
-                                    value={settings.whatsappNumber || ""}
-                                    onChange={e => set("whatsappNumber", e.target.value)}
-                                    placeholder="923001234567"
-                                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 font-mono"
-                                />
-                            </div>
+                        <div>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Store Address / Kiosk</label>
+                            <input
+                                type="text"
+                                value={localSettings.storeAddress || ""}
+                                onChange={e => set("storeAddress", e.target.value)}
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">Contact Phone</label>
+                            <input
+                                type="text"
+                                value={localSettings.storePhone || ""}
+                                onChange={e => set("storePhone", e.target.value)}
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54]"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[#EAE4D9]/70 block mb-1 font-medium">WhatsApp Number (with country code)</label>
+                            <input
+                                type="text"
+                                value={localSettings.whatsappNumber || ""}
+                                onChange={e => set("whatsappNumber", e.target.value)}
+                                placeholder="923001234567"
+                                className="w-full bg-black/50 border border-[#332A22] rounded-xl px-3 py-2 text-[#EAE4D9] focus:outline-none focus:border-[#C89D54] font-mono"
+                            />
                         </div>
                     </div>
                 </div>

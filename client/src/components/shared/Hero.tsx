@@ -1,80 +1,85 @@
 "use client";
 
 import { motion } from "framer-motion";
-
 import TextReveal from "../ui/TextReveal";
-import MagneticButton from "../ui/MagneticButton";
 import ParallaxBackground from "../ui/ParallaxBackground";
 import { ArrowRight } from "lucide-react";
+import { useSettings } from "../providers/SettingsContext";
+import { getImageUrl } from "@/lib/api";
+import Link from "next/link";
 
 export default function Hero({ image }: { image?: string }) {
+    const { settings } = useSettings();
+    const heroBg = image || getImageUrl(settings.heroImage) || "/hero-new.jpg";
+
     return (
-        <section className="relative h-screen w-full overflow-hidden bg-background flex items-center justify-center">
+        <section className="relative h-screen w-full overflow-hidden bg-[#120F0D] flex items-center justify-center">
             {/* Cinematic Parallax Background */}
-            <ParallaxBackground image={image || "/hero-new.jpg"} speed={0.3} className="opacity-40 blur-[1px]" />
+            <ParallaxBackground image={heroBg} speed={0.3} className="opacity-35 blur-[1px]" />
 
             {/* Gradient Overlay for depth */}
-            <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background/90 z-0" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#120F0D]/60 via-transparent to-[#120F0D] z-0" />
 
-            <div className="z-10 text-center px-4 max-w-7xl mx-auto space-y-12 flex flex-col items-center pt-32 lg:pt-40">
+            <div className="z-10 text-center px-4 max-w-7xl mx-auto space-y-10 flex flex-col items-center pt-32 lg:pt-40">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 1.5 }}
-                    className="space-y-4"
+                    className="space-y-6"
                 >
-                    <h1 className="text-[13vw] sm:text-7xl md:text-9xl font-bold tracking-tighter text-primary overflow-hidden">
+                    <div className="text-[12vw] sm:text-7xl md:text-9xl font-bold font-serif tracking-tight text-[#C89D54] overflow-hidden drop-shadow-2xl">
                         <TextReveal delay={0.2} duration={1.2}>
-                            ESCENSIO
+                            {settings.heroTitle || "ESCENSIO"}
                         </TextReveal>
-                    </h1>
+                    </div>
 
-                    <div className="overflow-hidden space-y-6 max-w-4xl mx-auto">
+                    <div className="overflow-hidden space-y-4 max-w-3xl mx-auto">
                         <motion.h2
                             initial={{ y: "100%" }}
                             animate={{ y: 0 }}
                             transition={{ duration: 1, delay: 0.8, ease: [0.33, 1, 0.68, 1] }}
-                            className="text-lg md:text-xl text-primary/80 font-medium tracking-wide uppercase"
+                            className="text-xs sm:text-sm font-mono text-[#C89D54]/90 font-semibold tracking-[0.3em] uppercase"
                         >
-                            The Essence of Luxury Fragrances
+                            {settings.storeTagline || "Artisanal Haute Parfumerie"}
                         </motion.h2>
 
                         <motion.p
                             initial={{ y: "100%", opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ duration: 1, delay: 1, ease: [0.33, 1, 0.68, 1] }}
-                            className="text-sm md:text-base text-foreground/60 font-light tracking-widest leading-relaxed max-w-2xl mx-auto"
+                            className="text-xs md:text-sm text-[#EAE4D9]/70 font-light tracking-wider leading-relaxed max-w-2xl mx-auto"
                         >
-                            Discover the art of fine fragrance with Escensio. Crafted for those who appreciate elegance, our perfumes blend timeless notes with modern sophistication.
-                            <br className="hidden md:block" />
-                            Experience luxury, confidence, and individuality — in every spray.
+                            {settings.heroSubtitle || "Handcrafted with rare botanical extracts, aged woods, and quiet elegance."}
                         </motion.p>
                     </div>
                 </motion.div>
 
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1, delay: 1.5 }}
+                    transition={{ duration: 1, delay: 1.4 }}
                 >
-                    <MagneticButton strength={40} className="bg-primary hover:bg-primary/90 text-primary-foreground border border-primary/20">
-                        Explore Collection <ArrowRight className="w-4 h-4" />
-                    </MagneticButton>
+                    <Link
+                        href="/shop"
+                        className="inline-flex items-center gap-3 bg-[#C89D54] hover:bg-[#b08743] text-black font-semibold px-8 py-3.5 rounded-sm text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-[#C89D54]/10 group"
+                    >
+                        Explore Catalog <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
                 </motion.div>
             </div>
 
-            {/* Cinematic scroll indicator */}
+            {/* Subtle Line scroll indicator */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 2.5, duration: 1 }}
+                transition={{ delay: 2, duration: 1 }}
                 className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
             >
-                <div className="w-[1px] h-12 bg-muted-foreground/20 overflow-hidden">
+                <div className="w-[1px] h-12 bg-[#C89D54]/20 overflow-hidden">
                     <motion.div
                         animate={{ y: ["-100%", "100%"] }}
-                        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                        className="w-full h-1/2 bg-primary/60"
+                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                        className="w-full h-1/2 bg-[#C89D54]"
                     />
                 </div>
             </motion.div>
