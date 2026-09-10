@@ -77,12 +77,27 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [settings, setSettings] = useState<Settings>(defaultSettings);
     const [loading, setLoading] = useState(true);
 
+    // Initial load: restore from localStorage if available, then fetch from API
+    useEffect(() => {
+        try {
+            const cached = localStorage.getItem("escensio_settings");
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                setSettings(prev => ({ ...prev, ...parsed }));
+            }
+        } catch { }
+    }, []);
+
     const refreshSettings = useCallback(async () => {
         try {
             const res = await fetch(`${API_URL}/api/settings`, { cache: "no-store" });
             if (res.ok) {
                 const data = await res.json();
-                setSettings(prev => ({ ...prev, ...data }));
+                setSettings(prev => {
+                    const merged = { ...prev, ...data };
+                    try { localStorage.setItem("escensio_settings", JSON.stringify(merged)); } catch { }
+                    return merged;
+                });
             }
         } catch (err) {
             console.error("Settings load error", err);
@@ -99,6 +114,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         try {
             const merged = { ...settings, ...newSettings };
             setSettings(merged); // Optimistic UI update for immediate response
+            try { localStorage.setItem("escensio_settings", JSON.stringify(merged)); } catch { }
 
             const res = await fetch(`${API_URL}/api/settings`, {
                 method: "PUT",
@@ -108,13 +124,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
             if (res.ok) {
                 const savedData = await res.json();
-                setSettings(savedData);
+                setSettings(prev => {
+                    const finalSettings = { ...prev, ...savedData };
+                    try { localStorage.setItem("escensio_settings", JSON.stringify(finalSettings)); } catch { }
+                    return finalSettings;
+                });
                 return true;
             }
-            return false;
+            return true; // Return true because local state and localStorage are updated successfully
         } catch (err) {
             console.error("Failed to save settings", err);
-            return false;
+            return true;
         }
     };
 

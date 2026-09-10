@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2, Pencil, X, Upload, Search, Star, Package } from "lucide-react";
 import API_URL, { getImageUrl } from "@/lib/api";
+import { compressImage } from "@/lib/imageCompressor";
 
 const CATEGORIES = ["Extrait de Parfum", "Eau de Parfum", "Discovery Sets", "Men's", "Women's", "Unisex"];
 
@@ -86,13 +87,11 @@ export default function AdminProducts() {
         try {
             let uploadedPaths: string[] = [...existingImages];
             if (images.length > 0) {
-                const fd = new FormData();
-                images.forEach(img => fd.append("images", img));
-                const uploadRes = await fetch(`${API_URL}/api/upload`, { method: "POST", body: fd });
-                if (uploadRes.ok) {
-                    const { paths } = await uploadRes.json();
-                    uploadedPaths = [...uploadedPaths, ...paths];
-                }
+                // Compress all selected images client-side
+                const compressedList = await Promise.all(
+                    images.map(file => compressImage(file, 1200, 1200, 0.82))
+                );
+                uploadedPaths = [...uploadedPaths, ...compressedList];
             }
             if (uploadedPaths.length === 0) uploadedPaths = ["/products/perfume-1.jpg"];
 
